@@ -1,6 +1,8 @@
 ﻿using CatalogoAnime.model;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +14,7 @@ namespace CatalogoAnime.controller
         private const int BYTES_SERIE = 57;
         private const int BYTES_PELICULA = 54;
         private int pos = -1;
-        public static int idImagen = 0;
+        public int idImagen = 0;
         internal string RUTAIMAGENES = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "img");
         public List<Anime> ListaAnime { get; set; }
         public GestAnime()
@@ -21,15 +23,17 @@ namespace CatalogoAnime.controller
             {
                 Directory.CreateDirectory(RUTAIMAGENES);
             }
-            ListaAnime = CargarArchivo();
+
+            ListaAnime = new List<Anime>();
 
             foreach (var anime in ListaAnime)
             {
-                if(idImagen < anime.IdImagen)
+                if (idImagen < anime.IdImagen)
                 {
                     idImagen = anime.IdImagen;
                 }
             }
+
         }
 
         //AGREGAR ANIMES
@@ -43,7 +47,6 @@ namespace CatalogoAnime.controller
                 
                 ListaAnime.Add(anime);
                 resultado = true;
-                idImagen++;
             }
             else
             {
@@ -56,125 +59,34 @@ namespace CatalogoAnime.controller
             }
             return resultado;
         }
+        public bool ModificarAnime( Anime anime, int idRegistro)
+        {
+            bool resultado = false;
+            Anime? a = ListaAnime[idRegistro];
+            if (a != null)
+            {
+                
+                ListaAnime.RemoveAt(idRegistro);
+                ListaAnime.Insert(idRegistro, anime);
+                resultado = true;
+            }
+            else
+            {
+                MessageBox.Show("Error al Guardar");
+            }
+            return resultado;
+        }
 
         //Borrar animes controlando para un posible filtrado con varios resultados.
         public void EliminarAnime(int id)
         {
+            string ruta = RUTAIMAGENES +"\\"+ (id + 1) + ".jpg";
+            File.Delete(ruta);
             ListaAnime.RemoveAt(id);
         }
 
-        //LISTAR ANIMES
-        public void ListarAnime(List<Anime> lst)
-        {
-            if (lst.Count == 0)
-            {
-                MessageBox.Show(
-                    "No hay animes para mostrar"
-                    );
-                Console.WriteLine("No hay animes.");
-            }
-            else
-            {
-                foreach (Anime a in lst)
-                {
-                    Console.WriteLine(a.ToString());
-                }
-            }
-        }
-        public List<Anime> BuscarAnime(Dictionary<string, string> dic)
-        {
-            List<Anime> lstFiltrada = new List<Anime>(ListaAnime);
-
-            List<Anime> filtroActual = new List<Anime>();
-
-            // Filtrar por tipo si existe
-            if (dic.ContainsKey("Tipo"))
-            {
-                string tipoBuscado = dic["Tipo"];
-                if (tipoBuscado == "TV")
-                {
-                    filtroActual = lstFiltrada.Where(a => a.TipoAnime == TipoAnime.TV).ToList();
-                }
-                else if (tipoBuscado == "PELICULA")
-                {
-                    filtroActual = lstFiltrada.Where(a => a.TipoAnime == TipoAnime.Pelicula).ToList();
-                }
-                else
-                {
-                    Console.WriteLine("Tipo no válido. Se procederá sin filtrado por tipo.");
-                    filtroActual = lstFiltrada;
-                }
-
-                // Aplicar filtros adicionales
-                filtroActual = FiltrarAComunes(filtroActual, dic);
-
-                // Filtrar por número de capítulos si es tipo TV
-                if (tipoBuscado == "TV" && dic.ContainsKey("NumCap"))
-                {
-                    int numCap = Int32.Parse(dic["NumCap"]);
-                    if (numCap > 0)
-                    {
-                        List<Serie> lstSerieFiltrada = filtroActual.OfType<Serie>().ToList();
-                        lstSerieFiltrada = lstSerieFiltrada.Where(a => a.NumeroCapitulos == numCap).ToList();
-                        filtroActual = lstSerieFiltrada.OfType<Anime>().ToList();
-                    }
-                }
-                // Filtrar por película única si es tipo Película
-                else if (tipoBuscado == "PELICULA" && dic.ContainsKey("PelUnica"))
-                {
-                    string peliculaUnica = dic["PelUnica"];
-                    if (!string.IsNullOrEmpty(peliculaUnica))
-                    {
-                        List<Pelicula> lstPeliculaFiltrada = filtroActual.OfType<Pelicula>().ToList();
-                        lstPeliculaFiltrada = lstPeliculaFiltrada.Where(a => a.getPeliculaUnica(peliculaUnica)).ToList();
-                        filtroActual = lstPeliculaFiltrada.OfType<Anime>().ToList();
-                    }
-                }
-            }
-            else
-            {
-                filtroActual = FiltrarAComunes(lstFiltrada, dic);
-            }
-
-            Console.WriteLine("Lista final de animes filtrados:");
-            foreach (var anime in filtroActual)
-            {
-                Console.WriteLine($"{anime.Nombre} - {anime.TipoAnime}");
-            }
-
-            return filtroActual;
-        }
-
-        public List<Anime> FiltrarAComunes(List<Anime> lstFiltrada, Dictionary<string, string> dic)
-        {
-            if (dic.ContainsKey("Nombre"))
-            {
-                string nombre = dic["Nombre"];
-                lstFiltrada = lstFiltrada.Where(a => a.Nombre.Contains(nombre)).ToList();
-            }
-
-            if (dic.ContainsKey("Genero"))
-            {
-                string genero = dic["Genero"];
-                lstFiltrada = lstFiltrada.Where(a => a.Genero == genero).ToList();
-            }
-
-            if (dic.ContainsKey("Estado"))
-            {
-                string estado = dic["Estado"];
-                if (estado == "En emision")
-                {
-                    lstFiltrada = lstFiltrada.Where(a => a.Estado).ToList();
-                }
-                else if (estado == "Finalizado")
-                {
-                    lstFiltrada = lstFiltrada.Where(a => a.Estado == false).ToList();
-                }
-            }
-
-            return lstFiltrada;
-        }
-
+        
+        
 
         //GUARDAR DATOS EN FICHERO
 
@@ -185,16 +97,16 @@ namespace CatalogoAnime.controller
             {
                 Serie serie = (Serie)a;
                 bw.Write("S");
-                GuardarComun(a, bw);
                 bw.Write(serie.NumeroCapitulos);
+                GuardarComun(a, bw);
 
             }
             else if (a is Pelicula)
             {
                 Pelicula pelicula = (Pelicula)a;
                 bw.Write("P");
-                GuardarComun(a, bw);
                 bw.Write(pelicula.PeliculaUnica);
+                GuardarComun(a, bw);
 
             }
 
@@ -253,11 +165,20 @@ namespace CatalogoAnime.controller
 
         public void GuardarImagen(string pathImage, int contImg)
         {
-            string imagenNombre = (idImagen) + ".jpg";
+            string imagenNombre = (contImg) + ".jpg";
             string rutaImagen = Path.Combine(RUTAIMAGENES, imagenNombre);
-            File.Copy(pathImage, rutaImagen, true);
+            try
+            {
+                File.Copy(pathImage, rutaImagen, true);
+            }
+            catch ( Exception e)
+            {
+                MessageBox.Show("Error al guardar la imagen: " + e.Message);
+            }
 
         }
+        
+        
 
 
 
@@ -267,12 +188,13 @@ namespace CatalogoAnime.controller
 
         public Serie CargarSerie(BinaryReader br)
         {
+            int numCap = br.ReadInt32();
             TipoAnime tipo = (TipoAnime)(br.ReadInt32());
             string nombre = br.ReadString().Trim();
             string genero = br.ReadString().Trim();
             bool estado = br.ReadBoolean();
-            int numCap = br.ReadInt32();
             int idFoto = br.ReadInt32();
+
             
 
             return new Serie(tipo, nombre, genero, estado,idFoto, numCap);
@@ -280,14 +202,14 @@ namespace CatalogoAnime.controller
 
         public Pelicula CargarPelicula(BinaryReader br)
         {
+            bool pelUnica = br.ReadBoolean();
             TipoAnime tipo = (TipoAnime)(br.ReadInt32());
             string nombre = br.ReadString().Trim();
             string genero = br.ReadString().Trim();
             bool estado = br.ReadBoolean();
-            bool pelUnica = br.ReadBoolean();
-            int idFoto = br.ReadInt32();
-            
+            int idFoto = Int32.Parse(br.ReadString());
 
+            
             return new Pelicula(tipo, nombre, genero, estado,idFoto ,pelUnica);
         }
 
@@ -305,6 +227,7 @@ namespace CatalogoAnime.controller
                             while (fileStr.Position < fileStr.Length - sizeof(Char))
                             {
                                 char marca = br.ReadChar();
+                                
                                 switch (marca)
                                 {
                                     case 'S':
@@ -326,7 +249,15 @@ namespace CatalogoAnime.controller
                             }
                         }
                     }
-                }
+
+                    foreach (var anime in lista)
+                    {
+                        if (idImagen < anime.IdImagen)
+                        {
+                            idImagen = anime.IdImagen;
+                        }
+                    }
+            }
                 catch (Exception ex)
                 {
                     MessageBox.Show(
@@ -337,11 +268,9 @@ namespace CatalogoAnime.controller
                         );
                     Console.WriteLine($"ERROR: Error durante el archivo. {ex.Message}");
                 }
-         
-
             return lista;
         }
-
+        
         private static bool SePuedenLeer(BinaryReader br, int numBytes)
         {
             bool sePuede = false;

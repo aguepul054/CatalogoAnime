@@ -2,7 +2,7 @@
 namespace CatalogoAnime
 {
     using model;
-    partial class Form2
+    partial class DetallesDataGrid
     {
         
         private System.ComponentModel.IContainer components = null;
@@ -15,8 +15,7 @@ namespace CatalogoAnime
             }
             base.Dispose(disposing);
         }
-        
 
-       
+        private Button btnFIltrar;
     }
 }

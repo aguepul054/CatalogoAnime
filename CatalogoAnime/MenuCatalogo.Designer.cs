@@ -39,6 +39,7 @@ namespace CatalogoAnime
             txtGenero = new TextBox();
             txtEstado = new ComboBox();
             txtRegistro = new Label();
+            btnModificar = new Button();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
@@ -272,7 +273,7 @@ namespace CatalogoAnime
             txtTipo.Name = "txtTipo";
             txtTipo.Size = new Size(121, 23);
             txtTipo.TabIndex = 22;
-            txtTipo.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
+            txtTipo.SelectedIndexChanged += txtTipo_SelectedIndexChanged;
             // 
             // lblNumCap
             // 
@@ -362,12 +363,27 @@ namespace CatalogoAnime
             txtRegistro.TabIndex = 31;
             txtRegistro.Text = "Registro: 0";
             // 
+            // btnModificar
+            // 
+            btnModificar.BackColor = Color.FromArgb(60, 164, 60);
+            btnModificar.Font = new Font("Tahoma", 10F);
+            btnModificar.ForeColor = SystemColors.ControlLightLight;
+            btnModificar.Location = new Point(12, 538);
+            btnModificar.Name = "btnModificar";
+            btnModificar.Size = new Size(138, 52);
+            btnModificar.TabIndex = 32;
+            btnModificar.Text = "Modificar";
+            btnModificar.UseVisualStyleBackColor = false;
+            btnModificar.Visible = false;
+            btnModificar.Click += btnModificar_Click;
+            // 
             // PanelPrincipal
             // 
             BackColor = Color.White;
             BackgroundImage = Properties.Resources.backgroundPantallaPrincipal;
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(1140, 602);
+            Controls.Add(btnModificar);
             Controls.Add(txtRegistro);
             Controls.Add(txtEstado);
             Controls.Add(txtGenero);
@@ -432,6 +448,7 @@ namespace CatalogoAnime
         private TextBox txtGenero;
         private ComboBox txtEstado;
         private Label txtRegistro;
+        private Button btnModificar;
     }
     
 }
