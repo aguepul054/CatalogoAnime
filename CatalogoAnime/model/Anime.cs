@@ -7,20 +7,20 @@ using System.Threading.Tasks;
 namespace CatalogoAnime.model
 {
     [Serializable]
-    //Clase padre llamada Anime que va a tener 2 subclases
+    // Clase padre llamada Anime que va a tener 2 subclases
     public class Anime
     {
-        //Atributos privados para poder añadir restricciones
+        // Atributos privados para poder añadir restricciones
         private string nombre;
         private string genero;
         public int IdImagen {  get; set; }
 
-        //En este no necesitamos restriccion porque debe de ser uno u otro
+        // En este no necesitamos restriccion porque debe de ser uno u otro
         public TipoAnime TipoAnime
         { get; set; }
 
-        //Metodo properties el cual contiene la restriccion de si se pasa de 20
-        //truncar el nombre o si es nulo vacio no lo mete.
+        // Metodo properties el cual contiene la restriccion de si se pasa de 20
+        // truncar el nombre o si es nulo vacio no lo mete.
         public string Nombre
         {
             get { return nombre; }
@@ -60,7 +60,7 @@ namespace CatalogoAnime.model
             }
         }
         public bool Estado { get; set; }
-        //Constructor vacio con datos por defecto
+        // Constructor vacio con datos por defecto
         public Anime()
         {
             TipoAnime = new TipoAnime();
@@ -68,7 +68,7 @@ namespace CatalogoAnime.model
             Genero = "Sin genero";
             Estado = false;
         }
-        //Constructor con parametros para serie
+        // Constructor con parametros para serie
         public Anime(string tipoAnime, string nombre, string genero, string estado)
         {
             TipoAnime = getTipoAnime(tipoAnime);
@@ -77,7 +77,7 @@ namespace CatalogoAnime.model
             Estado = getEstado(estado);
         }
 
-        //Constructor para cargar archivos de tipo Serie.
+        // Constructor para cargar archivos de tipo Serie.
         public Anime(TipoAnime tipoAnime, string nombre, string genero, bool estado, int idImagen)
         {
             TipoAnime = tipoAnime;
@@ -87,20 +87,14 @@ namespace CatalogoAnime.model
             IdImagen = idImagen;
         }
 
-        public Anime(TipoAnime tipoAnime, string nombre, string genero)
-        {
-            TipoAnime = tipoAnime;
-            Nombre = nombre;
-            Genero = genero;
-        }
-
+        // Constructor para Pelicula
         public Anime(string tipoAnime, string nombre, string genero)
         {
             TipoAnime = getTipoAnime(tipoAnime);
             Nombre = nombre;
             Genero = genero;
         }
-        //Metodo que va al constructor para guardar el tipo de anime que es
+        // Metodo que va al constructor para guardar el tipo de anime que es
         private TipoAnime getTipoAnime(string tipoAnime)
         {
             TipoAnime tipo = new TipoAnime();
@@ -114,8 +108,8 @@ namespace CatalogoAnime.model
 
             return tipo;
         }
-        //Metodo que va al constructor para que mediante una cadena guarde en un bool 
-        //el estado del anime
+        // Metodo que va al constructor para que mediante una cadena guarde en un bool 
+        // el estado del anime
         public bool getEstado(string estado)
         {
             bool estadoAnime = false;
@@ -133,7 +127,7 @@ namespace CatalogoAnime.model
 
             return estadoAnime;
         }
-        //Metodo toString base.
+        // Metodo toString base.
         public override string ToString()
         {
             string mensaje = Estado ? "En Emision" : "Finalizado";

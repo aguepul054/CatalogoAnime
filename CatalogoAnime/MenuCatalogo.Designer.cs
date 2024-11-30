@@ -361,7 +361,7 @@ namespace CatalogoAnime
             txtRegistro.Name = "txtRegistro";
             txtRegistro.Size = new Size(62, 15);
             txtRegistro.TabIndex = 31;
-            txtRegistro.Text = "Registro: 0";
+            txtRegistro.Text = "Registro: 0/0";
             // 
             // btnModificar
             // 

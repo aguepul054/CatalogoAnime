@@ -1,120 +1,71 @@
 ﻿using CatalogoAnime.model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace CatalogoAnime
 {
     public partial class DetallesDataGrid : Form
     {
-        private DataGridView dataGridView;
-        private BindingSource bindingSource;
+        private DataGridView dataGridView; // Componente DataGridView para mostrar los animes
+        private List<Anime> lstAnime;  // Lista original de animes
 
-        // Controles para el filtrado
-        private TextBox txtNombre;
-        private ComboBox cmbTipo;
-        private ComboBox cmbEstado;
-        private Button btnFiltrar;
-
+        // Constructor de la clase, recibe una lista de animes
         public DetallesDataGrid(List<Anime> lstAnime)
         {
-            InitializeComponent();
+            InitializeComponent(); // Inicializamos los componentes del form
 
-            // Inicializar BindingSource
-            bindingSource = new BindingSource();
-            bindingSource.DataSource = lstAnime;
+            this.lstAnime = lstAnime;  // Asignamos la lista original a la variable
 
-            // Asignar el DataGridView al formulario
-            dataGridView.DataSource = bindingSource;
+            // Asignar la lista original al DataGridView
+            dataGridView.DataSource = lstAnime;
         }
 
-        private void InitializeComponent()
-        {
-            // Crear los controles y asignar propiedades
-            this.dataGridView = new System.Windows.Forms.DataGridView();
-            this.btnFiltrar = new System.Windows.Forms.Button();
-            this.txtNombre = new System.Windows.Forms.TextBox();
-            this.cmbTipo = new System.Windows.Forms.ComboBox();
-            this.cmbEstado = new System.Windows.Forms.ComboBox();
-
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).BeginInit();
-            this.SuspendLayout();
-
-            // 
-            // dataGridView
-            // 
-            this.dataGridView.Dock = System.Windows.Forms.DockStyle.Top;
-            this.dataGridView.AutoGenerateColumns = true;
-            this.dataGridView.Height = 200;
-            this.dataGridView.ReadOnly = true; // No permitir edición
-            // 
-            // txtNombre
-            // 
-            this.txtNombre.Location = new System.Drawing.Point(20, 220);
-            this.txtNombre.Width = 200;
-            // 
-            // cmbTipo
-            // 
-            this.cmbTipo.Location = new System.Drawing.Point(240, 220);
-            this.cmbTipo.Width = 150;
-            this.cmbTipo.Items.Add("TV");
-            this.cmbTipo.Items.Add("Pelicula");
-            this.cmbTipo.SelectedIndex = 0; // Valor predeterminado
-            // 
-            // cmbEstado
-            // 
-            this.cmbEstado.Location = new System.Drawing.Point(400, 220);
-            this.cmbEstado.Width = 150;
-            this.cmbEstado.Items.Add("En Emisión");
-            this.cmbEstado.Items.Add("Finalizado");
-            this.cmbEstado.SelectedIndex = 0; // Valor predeterminado
-            // 
-            // btnFiltrar
-            // 
-            this.btnFiltrar.Location = new System.Drawing.Point(580, 220);
-            this.btnFiltrar.Text = "Filtrar";
-            this.btnFiltrar.Click += new EventHandler(this.btnFiltrar_Click);
-
-            // Agregar controles al formulario
-            this.Controls.Add(this.dataGridView);
-            this.Controls.Add(this.txtNombre);
-            this.Controls.Add(this.cmbTipo);
-            this.Controls.Add(this.cmbEstado);
-            this.Controls.Add(this.btnFiltrar);
-
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView)).EndInit();
-            this.ResumeLayout(false);
-        }
-
+        // Evento que se ejecuta cuando se presiona el boton de filtrar
         private void btnFiltrar_Click(object sender, EventArgs e)
         {
             Filtrar();
         }
 
+        // Metodo que realiza el filtrado de la lista 
         private void Filtrar()
         {
             try
             {
                 // Obtener los valores de los filtros
-                string nombreFiltro = txtNombre.Text;
-                string tipoFiltro = cmbTipo.SelectedItem.ToString();
-                string estadoFiltro = cmbEstado.SelectedItem.ToString();
+                string nombreFiltro = txtNombre.Text.Trim();
+                string generoFiltro = txtGenero.Text.Trim();
+                string tipoFiltro = cmbTipo.SelectedItem?.ToString();  // Se asegura de que no sea null
+                string estadoFiltro = cmbEstado.SelectedItem?.ToString();  // Se asegura de que no sea null
 
-                // Crear la expresión de filtro
-                string filtro = "Nombre LIKE '%" + nombreFiltro + "%'";
+                // Filtrar la lista original basándonos en los filtros
+                var listaFiltrada = lstAnime.Where(anime =>
+                    // Filtrar por nombre si no está vacío
+                    (string.IsNullOrEmpty(nombreFiltro) || anime.Nombre.Contains(nombreFiltro, StringComparison.OrdinalIgnoreCase)) &&
+                    // Filtrar por género si no está vacío
+                    (string.IsNullOrEmpty(generoFiltro) || anime.Genero.Contains(generoFiltro, StringComparison.OrdinalIgnoreCase)) &&
+                    // Filtrar por tipo de anime si se ha seleccionado un tipo
+                    (string.IsNullOrEmpty(tipoFiltro) || tipoFiltro == "Seleccione..." ||
+                        (tipoFiltro == "TV" && anime.TipoAnime == TipoAnime.TV) ||
+                        (tipoFiltro == "Pelicula" && anime.TipoAnime == TipoAnime.Pelicula)) &&
+                    // Filtrar por estado si se ha seleccionado un estado
+                    (string.IsNullOrEmpty(estadoFiltro) || estadoFiltro == "Seleccione..." || anime.Estado == (estadoFiltro == "En Emisión"))
+                ).ToList();  // Convertir a List<Anime> para que podamos usar Count()
 
-                if (!string.IsNullOrEmpty(tipoFiltro))
-                    filtro += " AND TipoAnime = '" + tipoFiltro + "'";
+                // Actualizar el DataGridView con la lista filtrada
+                dataGridView.DataSource = listaFiltrada;
 
-                // Asegúrate de que Estado se evalúe correctamente
-                bool estadoBool = estadoFiltro == "En Emisión"; // Verifica que el filtro sea un booleano
-                filtro += " AND Estado = " + (estadoBool ? "True" : "False");
-
-                // Aplicar el filtro al BindingSource
-                bindingSource.Filter = filtro;
+                // Verificar si hay resultados
+                if (listaFiltrada.Count == 0)
+                {
+                    // Mostrar un mensaje si no se encuentran resultados
+                    MessageBox.Show("No se encontraron resultados para los filtros aplicados.");
+                }
             }
             catch (Exception ex)
             {
+                // Manejar cualquier excepción que ocurra durante el filtrado
                 MessageBox.Show("Error al aplicar el filtro: " + ex.Message);
             }
         }
